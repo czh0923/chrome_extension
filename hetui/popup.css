@@ -1,0 +1,16 @@
+.workspace {
+    background-color: lightgray;
+}
+
+img {
+    width: 20px;
+    height: 20px;
+}
+
+.inline-p {
+    display: inline;
+}
+
+/* p {
+    display: inline;
+} */

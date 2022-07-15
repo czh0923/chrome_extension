@@ -9,12 +9,12 @@ a {
 }
 
 a:hover {
-    color:aliceblue;
+    color:gray;
 }
 
 .workspace {
     border-radius: 15px;
-    background-color:burlywood;
+    background-color:lavender;
 }
 
 .workspaceTitle {

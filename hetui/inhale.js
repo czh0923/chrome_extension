@@ -1,6 +1,30 @@
 const inhaleButton = document.getElementById("inhaleButton");
+const clearButton = document.getElementById("clearButton");
 const workspacesDiv = document.getElementById("workspacesDiv");
 console.log("in inhale.js");
+
+
+// async function displayStorage() {
+//     const result = await chrome.storage.local.get();
+
+//     console.log(result);
+
+//     result.forEach(function(workspace) {
+//         console.log(workspace.key);
+//     })
+// }
+
+// displayStorage();
+
+(async () => {
+    const result = await chrome.storage.local.get(["workspace"]);
+
+    console.log(result, result.length);
+    // result.forEach(function(workspace) {
+    //     console.log(workspace.key);
+    // })
+
+})();
 
 function createNewWorkspace() {
     let div = document.createElement("div");
@@ -13,6 +37,8 @@ function createNewWorkspace() {
     // div.innerText = "workspace";
 
     workspacesDiv.appendChild(div);
+
+    
 
     return div;
 }
@@ -35,7 +61,6 @@ function display(div, tabURLs, tabIconURLs, tabTitles) {
         innerP.innerHTML = tabTitles[i];
 
         p.appendChild(icon);
-        // p.appendChild(innerP);
         p.appendChild(a);
 
         div.appendChild(p);
@@ -50,7 +75,7 @@ async function getTabs() {
 
     const tabs = await chrome.windows.getCurrent({"populate":true});
 
-    console.log(tabs.tabs);
+    // console.log(tabs.tabs);
 
     tabs.tabs.forEach(function(tab) {
         tabURLs.push(tab.url);
@@ -59,6 +84,11 @@ async function getTabs() {
     })
     
     return {tabURLs, tabIconURLs, tabTitles};
+}
+
+async function storeWorkspace(workspaceName, tabURLs, tabIconURLs, tabTitles) {
+
+    await chrome.storage.local.set({[workspaceName]: {tabURLs, tabIconURLs, tabTitles}});
 }
 
 async function inhale() {
@@ -70,6 +100,14 @@ async function inhale() {
 
     display(newWorkspaceDiv, tabURLs, tabIconURLs, tabTitles);
 
+    await storeWorkspace("workspace1", tabURLs, tabIconURLs, tabTitles);
+
 }
 
-inhaleButton.addEventListener("click", inhale)
+inhaleButton.addEventListener("click", inhale);
+
+async function clearChromeStorage() {
+    await chrome.storage.local.clear();
+}
+
+clearButton.addEventListener("click", clearChromeStorage);

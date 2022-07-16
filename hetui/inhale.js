@@ -1,38 +1,42 @@
 const inhaleButton = document.getElementById("inhaleButton");
 const clearButton = document.getElementById("clearButton");
+const openButton = document.getElementById("openButton");
 const workspacesDiv = document.getElementById("workspacesDiv");
 console.log("in inhale.js");
 
 
-async function refresh() {
+async function getLocalStorage() {
+
     const result = await chrome.storage.local.get();
 
-    console.log(result);
-
-    if (Object.keys(result).length == 0) {
-        console.log("here");
-        while (workspacesDiv.hasChildNodes()) {
-            workspacesDiv.removeChild(workspacesDiv.firstChild);
-        }
-
-        return; 
-    }
+    var tabURLs = [];
+    var tabIconURLs = [];
+    var tabTitles = [];
 
     for (let r in result) {
         console.log(r);
 
-        var tabURLs = result[r]["tabURLs"];
-        var tabIconURLs = result[r]["tabIconURLs"];
-        var tabTitles = result[r]["tabTitles"];
+        tabURLs = result[r]["tabURLs"];
+        tabIconURLs = result[r]["tabIconURLs"];
+        tabTitles = result[r]["tabTitles"];
     }
 
+    return {tabURLs, tabIconURLs, tabTitles}
 
-    let newWorkspaceDiv = createNewWorkspace();
-    console.log(tabURLs, tabIconURLs, tabTitles);
-    display(newWorkspaceDiv, tabURLs, tabIconURLs, tabTitles);
 }
 
-refresh();
+async function refresh() {
+
+    while (workspacesDiv.hasChildNodes()) {
+        workspacesDiv.removeChild(workspacesDiv.firstChild);
+    }
+
+    let {tabURLs, tabIconURLs, tabTitles} = await getLocalStorage();
+
+    createWorkspaceAndDisplay(tabURLs, tabIconURLs, tabTitles);
+
+}
+
 
 function createNewWorkspace() {
     let div = document.createElement("div");
@@ -52,6 +56,8 @@ function createNewWorkspace() {
 }
 
 function display(div, tabURLs, tabIconURLs, tabTitles) {
+
+    console.log(tabTitles);
 
     for (let i = 0; i < tabTitles.length; i++) {
 
@@ -73,6 +79,16 @@ function display(div, tabURLs, tabIconURLs, tabTitles) {
 
         div.appendChild(p);
     }
+}
+
+function createWorkspaceAndDisplay(tabURLs, tabIconURLs, tabTitles) {
+    if (tabURLs.length == 0) {
+        return;
+    }
+
+    let div = createNewWorkspace();
+    display(div, tabURLs, tabIconURLs, tabTitles);
+
 }
 
 
@@ -103,11 +119,9 @@ async function storeWorkspace(workspaceName, tabURLs, tabIconURLs, tabTitles) {
 async function inhale() {
     console.log("hello");
 
-    let newWorkspaceDiv = createNewWorkspace();
-
     let {tabURLs, tabIconURLs, tabTitles} = await getTabs();
 
-    display(newWorkspaceDiv, tabURLs, tabIconURLs, tabTitles);
+    createWorkspaceAndDisplay(tabTitles, tabIconURLs, tabTitles);
 
     await storeWorkspace("workspace", tabURLs, tabIconURLs, tabTitles);
 
@@ -121,3 +135,19 @@ async function clearChromeStorage() {
 }
 
 clearButton.addEventListener("click", clearChromeStorage);
+
+async function reopenPage() {
+
+    let {tabURLs, tabIconURLs, tabTitles} = await getLocalStorage();
+
+    for (let l in tabURLs) {
+        console.log(l);
+        chrome.tabs.create({url:tabURLs[l]});
+    }
+
+}
+
+openButton.addEventListener("click", reopenPage);
+
+
+refresh();

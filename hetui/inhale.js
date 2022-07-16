@@ -3,8 +3,20 @@ const clearButton = document.getElementById("clearButton");
 const workspacesDiv = document.getElementById("workspacesDiv");
 console.log("in inhale.js");
 
-(async () => {
+
+async function refresh() {
     const result = await chrome.storage.local.get();
+
+    console.log(result);
+
+    if (Object.keys(result).length == 0) {
+        console.log("here");
+        while (workspacesDiv.hasChildNodes()) {
+            workspacesDiv.removeChild(workspacesDiv.firstChild);
+        }
+
+        return; 
+    }
 
     for (let r in result) {
         console.log(r);
@@ -18,8 +30,9 @@ console.log("in inhale.js");
     let newWorkspaceDiv = createNewWorkspace();
     console.log(tabURLs, tabIconURLs, tabTitles);
     display(newWorkspaceDiv, tabURLs, tabIconURLs, tabTitles);
+}
 
-})();
+refresh();
 
 function createNewWorkspace() {
     let div = document.createElement("div");
@@ -104,6 +117,7 @@ inhaleButton.addEventListener("click", inhale);
 
 async function clearChromeStorage() {
     await chrome.storage.local.clear();
+    refresh();
 }
 
 clearButton.addEventListener("click", clearChromeStorage);
